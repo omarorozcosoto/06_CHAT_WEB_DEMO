@@ -1,0 +1,488 @@
+CHAT DEMO OMAR OROZCO SOTO
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ChatWeb</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Barra lateral */
+        .sidebar {
+            width: 260px;
+            background: #111827;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .new-chat {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            background: #1f2937;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .new-chat:hover {
+            background: #374151;
+        }
+
+        .history-title {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-bottom: 10px;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-radius: 7px;
+            color: #d1d5db;
+            cursor: pointer;
+            margin-bottom: 5px;
+        }
+
+        .history-item:hover {
+            background: #1f2937;
+        }
+
+        /* Área principal */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .header {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status {
+            margin-left: 10px;
+            font-size: 12px;
+            color: #10b981;
+            font-weight: normal;
+        }
+
+        /* Mensajes */
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
+        }
+
+        .messages {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .bot .avatar {
+            background: #2563eb;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .user .avatar {
+            background: #111827;
+            color: white;
+            margin-left: 10px;
+            order: 2;
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 13px 16px;
+            border-radius: 14px;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .bot .bubble {
+            background: white;
+            border: 1px solid #e5e7eb;
+        }
+
+        .user .bubble {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* Área de entrada */
+        .input-area {
+            padding: 15px 20px 20px;
+            background: #f5f7fb;
+        }
+
+        .input-container {
+            max-width: 850px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 14px;
+            padding: 7px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        #messageInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px;
+            font-size: 15px;
+            background: transparent;
+        }
+
+        #sendButton {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #sendButton:hover {
+            background: #1d4ed8;
+        }
+
+        #sendButton:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            .sidebar {
+                display: none;
+            }
+
+            .bubble {
+                max-width: 85%;
+            }
+
+            .header {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            💬 ChatWeb
+        </div>
+
+        <button class="new-chat" onclick="newChat()">
+            ＋ Nuevo chat
+        </button>
+
+        <div class="history-title">
+            HISTORIAL
+        </div>
+
+        <div class="history-item">
+            Conversación nueva
+        </div>
+
+        <div class="history-item">
+            Preguntas generales
+        </div>
+
+    </aside>
+
+
+    <!-- Aplicación principal -->
+    <main class="main">
+
+        <header class="header">
+            ChatWeb
+            <span class="status">● En línea</span>
+        </header>
+
+
+        <!-- Conversación -->
+        <section class="chat" id="chat">
+
+            <div class="messages" id="messages">
+
+                <div class="message bot">
+
+                    <div class="avatar">
+                        🤖
+                    </div>
+
+                    <div class="bubble">
+                        ¡Hola! 👋<br><br>
+                        Soy <strong>ChatWeb</strong>. ¿En qué puedo ayudarte?
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Entrada -->
+        <div class="input-area">
+
+            <div class="input-container">
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    placeholder="Escribe un mensaje..."
+                    autocomplete="off"
+                >
+
+                <button id="sendButton" onclick="sendMessage()">
+                    ➤
+                </button>
+
+            </div>
+
+            <div class="footer">
+                ChatWeb · Aplicación web de demostración
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    const input = document.getElementById("messageInput");
+    const messages = document.getElementById("messages");
+
+    // Permitir enviar con Enter
+    input.addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+
+    });
+
+
+    function sendMessage() {
+
+        const text = input.value.trim();
+
+        if (text === "") {
+            return;
+        }
+
+        // Mostrar mensaje del usuario
+        addMessage(text, "user");
+
+        input.value = "";
+
+        // Simular respuesta
+        setTimeout(function() {
+
+            let response = generateResponse(text);
+
+            addMessage(response, "bot");
+
+        }, 700);
+
+    }
+
+
+    function addMessage(text, type) {
+
+        const message = document.createElement("div");
+
+        message.className = "message " + type;
+
+        if (type === "user") {
+
+            message.innerHTML = `
+                <div class="bubble">
+                    ${escapeHTML(text)}
+                </div>
+
+                <div class="avatar">
+                    👤
+                </div>
+            `;
+
+        } else {
+
+            message.innerHTML = `
+                <div class="avatar">
+                    🤖
+                </div>
+
+                <div class="bubble">
+                    ${text}
+                </div>
+            `;
+
+        }
+
+        messages.appendChild(message);
+
+        // Bajar automáticamente
+        const chat = document.getElementById("chat");
+
+        chat.scrollTop = chat.scrollHeight;
+
+    }
+
+
+    function generateResponse(text) {
+
+        const message = text.toLowerCase();
+
+        if (message.includes("hola")) {
+
+            return "¡Hola! 👋 Es un gusto saludarte. ¿Qué te gustaría hacer?";
+
+        }
+
+        if (message.includes("cómo estás") ||
+            message.includes("como estas")) {
+
+            return "¡Muy bien, gracias! 😊 Estoy listo para ayudarte.";
+
+        }
+
+        if (message.includes("github")) {
+
+            return "GitHub permite almacenar y publicar proyectos web. 🚀 Puedes utilizar GitHub Pages para publicar tu archivo <strong>index.html</strong>.";
+
+        }
+
+        if (message.includes("gracias")) {
+
+            return "¡De nada! 😄";
+
+        }
+
+        return "Entiendo. 👍 Esta es una respuesta de demostración de ChatWeb. Puedes conectar este chat con una API de inteligencia artificial para obtener respuestas reales.";
+
+    }
+
+
+    function escapeHTML(text) {
+
+        const div = document.createElement("div");
+
+        div.textContent = text;
+
+        return div.innerHTML;
+
+    }
+
+
+    function newChat() {
+
+        messages.innerHTML = `
+
+            <div class="message bot">
+
+                <div class="avatar">
+                    🤖
+                </div>
+
+                <div class="bubble">
+                    ¡Hola! 👋<br><br>
+                    Soy <strong>ChatWeb</strong>. ¿En qué puedo ayudarte?
+                </div>
+
+            </div>
+
+        `;
+
+        input.focus();
+
+    }
+
+</script>
+
+</body>
+</html>
+```
